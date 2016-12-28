@@ -21,7 +21,7 @@ def grouping(fileList):
 
 def displayItems(items, path, prefix, color):
     for index, item in enumerate(sorted(items.keys())):
-        if index == len(items)-1:
+        if index == len(items) - 1:
             print prefix + '└── ' + appendColor(path, item, color)
             nextPrefix = prefix + '    '
         else:
@@ -51,8 +51,14 @@ def appendColor(path, item, color=False):
     return colorCode + item + endCode + indicator
 
 
-def main():
-    cmd = 'git ls-files'
+def nested_set(dic, keys, value):
+    for key in keys[:-1]:
+        dic = dic.setdefault(key, {})
+
+    dic = dic.setdefault(keys[-1], value)
+
+
+def execute(cmd):
     p = subprocess.Popen(
         cmd,
         shell=True,
@@ -61,15 +67,51 @@ def main():
     p.wait()
     stdout_data = p.stdout.readlines()
     stderr_data = p.stderr.read()
+    return stdout_data, stderr_data, p
+
+
+def isOnGitRepository():
+    cmd = "git rev-parse"
+    stdout_data, stderr_data, p = execute(cmd)
+
+    return p.returncode is 0
+
+
+def getFileListWithoutGit():
+    filesList = {}
+    for root, dirs, files in os.walk(".", topdown=False):
+        roots = root.split("/")
+        del roots[0]
+
+        for name in files:
+            nested_set(filesList, roots + [name], {})
+        for name in dirs:
+            nested_set(filesList, roots + [name], {})
+
+        print filesList
+
+    return filesList
+
+
+def getFileListWithGit():
+    cmd = 'git ls-files'
+    stdout_data, stderr_data, _ = execute(cmd)
     if len(stderr_data) > 0:
         print stderr_data,
     else:
-        color = True
-        currentDir = os.path.split(os.getcwd())
-        print appendColor(currentDir[0], currentDir[1], color)
         group = grouping(stdout_data)
+    return group
 
-        displayItems(group, '.', '', color)
+
+def main():
+    if isOnGitRepository():
+        group = getFileListWithGit()
+    else:
+        group = getFileListWithoutGit()
+    color = True
+    currentDir = os.path.split(os.getcwd())
+    print appendColor(currentDir[0], currentDir[1], color)
+    displayItems(group, '.', '', color)
 
 
 if __name__ == '__main__':
