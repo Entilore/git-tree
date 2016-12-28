@@ -8,11 +8,12 @@ import click
 
 @click.command()
 @click.option('--output', "-o", help='Output file.')
-def main(output):
+@click.option('--ignore', '-i', help='Ignore files matching this regex', default="")
+def main(output, ignore):
     if compute.isOnGitRepository():
-        group = compute.getFileListWithGit()
+        group = compute.getFileListWithGit(ignore)
     else:
-        group = compute.getFileListWithoutGit()
+        group = compute.getFileListWithoutGit(ignore)
     display.display(group, output)
 
 
