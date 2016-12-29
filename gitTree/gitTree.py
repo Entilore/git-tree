@@ -16,8 +16,7 @@ def main(output, ignore, path):
         if output:
             output = os.path.join(os.getcwd(), output)
         os.chdir(path)
-    if output:
-        print(output)
+
     if compute.isOnGitRepository():
         group = compute.getFileListWithGit(ignore)
     else:
