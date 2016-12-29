@@ -4,12 +4,20 @@
 import display
 import compute
 import click
+import os
 
 
 @click.command()
 @click.option('--output', "-o", help='Output file.')
 @click.option('--ignore', '-i', help='Ignore files matching this regex', default="")
-def main(output, ignore):
+@click.argument("path",  type=click.Path(exists=True), required=False)
+def main(output, ignore, path):
+    if path:
+        if output:
+            output = os.path.join(os.getcwd(), output)
+        os.chdir(path)
+    if output:
+        print(output)
     if compute.isOnGitRepository():
         group = compute.getFileListWithGit(ignore)
     else:
