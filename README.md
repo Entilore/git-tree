@@ -18,7 +18,16 @@ or
 ```
 $git tree
 ```
-`
+
+The result can be exported to a latex file with this way:
+```
+$git-tree -o file.tex
+```
+
+Some other file might be ignored with a regex like pattern: 
+```
+$git-tree -i "someFile|someOtherFile"
+```
 
 ## Licence
 
